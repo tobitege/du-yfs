@@ -1,10 +1,10 @@
 require("abstraction/Vehicle")
 require("GlobalTypes")
-local s                                 = require("Singletons")
-local log, pub, universe, constants     = s.log, s.pub, s.universe, s.constants
+local si = require("Singletons")
+local log, pub, universe, constants = si.log, si.pub, si.universe, si.constants
 
-local Route, pagination, distanceFormat = require("flight/route/Route"), require("util/Pagination"),
-    require("util/DistanceFormat")
+local Route, pagination = require("flight/route/Route"), require("util/Pagination")
+local distanceFormat = require("util/DistanceFormat")
 require("util/Table")
 
 ---@alias NamedWaypoint {name:string, point:Point}
@@ -513,6 +513,8 @@ function RouteController.Instance(bufferedDB)
     ---@param gateControlDistance? number Gate control will only be activated if this close to a controlled point in the route
     ---@return boolean
     function s.ActivateRoute(name, destinationWayPointIndex, startMargin, gateControlDistance)
+        pub.Publish("RouteName", "") --tte
+
         startMargin = startMargin or 0
         gateControlDistance = gateControlDistance or constants.route.gateControlDistance
         local candidate = s.doBasicCheckesOnActivation(name, destinationWayPointIndex or 1)
@@ -538,9 +540,9 @@ function RouteController.Instance(bufferedDB)
 
         current = candidate
         activeRouteName = name
+        pub.Publish("RouteName", name) --tte
 
         log.Info("Route '", name, "' activated at index " .. destinationWayPointIndex)
-
         return true
     end
 
@@ -548,6 +550,7 @@ function RouteController.Instance(bufferedDB)
     ---@param name string|nil
     ---@return Route
     function s.ActivateTempRoute(name)
+        pub.Publish("RouteName", "") --tte
         current = Route.New()
         activeRouteName = name or "---"
         return current
@@ -557,6 +560,7 @@ function RouteController.Instance(bufferedDB)
     ---@param name string
     ---@return Route|nil
     function s.CreateRoute(name)
+        pub.Publish("RouteName", "") --tte
         if edit ~= nil then
             log.Error("A route is being edited, can't create a new one.")
             return nil

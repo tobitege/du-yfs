@@ -3,7 +3,7 @@ local si                              = require("Singletons")
 local log, pub, input, calc, Template = si.log, si.pub, si.input, si.calc, require("Template")
 local hudTemplate                     = library.embedFile("hud.html")
 
-local updateInterval                  = 0.3
+local updateInterval                  = 0.2
 
 ---@alias HudData {speed:number, maxSpeed:number}
 
@@ -17,6 +17,8 @@ Hud.__index                           = Hud
 function Hud.New()
     local s = {}
     local flightData = {} ---@type FlightData
+    local routeInfo = {} ---@type table<string,integer>
+    local routeName = ""
     local fuelByType = {} ---@type table<string,FuelTankInfo[]>
     local unitInfo = system.getItem(unit.getItemId())
     local isECU = unitInfo.displayNameWithSize:lower():match("emergency")
@@ -32,7 +34,7 @@ function Hud.New()
         sw.Start()
 
         while true do
-            if sw.Elapsed() > updateInterval then
+            if sw.Elapsed() >= updateInterval then
                 sw.Restart()
 
                 local html = tpl({
@@ -41,6 +43,10 @@ function Hud.New()
                         "Automatic Control",
                     fuelByType = fuelByType,
                     isECU = isECU,
+                    info = flightData.altitude and string.format("Alt: %.2fm", flightData.altitude),
+                    routeName = routeName,
+                    pointIx = routeInfo.ix,
+                    pointRef = routeInfo.pointRef,
                 })
 
                 system.setScreen(html)
@@ -51,6 +57,21 @@ function Hud.New()
         log.Error(t.Name(), " ", t.Error())
     end)
 
+    --tte
+    pub.RegisterString("RouteName",
+        ---@param _ string
+        ---@param rname string
+        function(_, rname)
+            routeName = rname
+        end)
+
+    --tte
+    pub.RegisterTable("RouteInfo",
+        ---@param _ string
+        ---@param data table<string,integer>
+        function(_, data)
+            routeInfo = data
+        end)
 
     pub.RegisterTable("FlightData",
         ---@param _ string

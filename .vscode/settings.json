@@ -9,5 +9,19 @@
         "e/render/src",
         "${3rd}/luassert/library",
         "${3rd}/busted/library"
-    ]
+    ],
+    "Lua.workspace.maxPreload": 1100,
+    "Lua.diagnostics.globals": [
+        "P",
+        "system",
+        "SU",
+        "Out",
+        "library",
+        "construct",
+        "library",
+        "traceback",
+        "player",
+        "unit"
+    ],
+    "files.eol": "\n"
 }

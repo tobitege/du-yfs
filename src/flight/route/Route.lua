@@ -1,14 +1,14 @@
 --[[
-    A route holds a series of Point that each contains the data needed to create a Waypoint.
-    When loaded, additional points may be inserted to to create a route that is smooth to fly
+    A route holds a series of Points, each containing the data needed to create a Waypoint.
+    When loaded, additional points may be inserted to create a route that is smooth to fly
     and that doesn't pass through a planetary body. Extra points are not persisted.
 ]]
 
-
 require("abstraction/Vehicle")
 require("GlobalTypes")
-local s                               = require("Singletons")
-local log, universe, calc, pagination = s.log, s.universe, s.calc, require("util/Pagination")
+local si                              = require("Singletons")
+local log, universe, calc, pagination = si.log, si.universe, si.calc, require("util/Pagination")
+local pub                             = si.pub
 require("util/Table")
 
 ---@module "Vec3"
@@ -41,6 +41,7 @@ require("util/Table")
 ---@field WaitForGate fun(current:Vec3, margin:number):boolean
 ---@field HasTag fun(t:string):boolean
 ---@field AddTag fun(t:string)
+---@field GetWaypointRef fun(ix:integer) --tte
 local Route = {}
 Route.__index = Route
 
@@ -156,9 +157,18 @@ function Route.New()
     ---Returns the next point in the route or nil if the end has been reached
     ---@return Point|nil
     function s.Next()
-        if s.LastPointReached() then return nil end
+        if s.LastPointReached() then
+            pub.Publish("RouteInfo", {})  --tte
+            return nil
+        end
 
         local p = points[nextPointIx]
+
+        pub.Publish("RouteInfo", { --tte
+            ix = nextPointIx,
+            pointRef = p.WaypointRef()
+        })
+
         nextPointIx = nextPointIx + 1
 
         return p
@@ -380,6 +390,17 @@ function Route.New()
     ---@return boolean
     function s.HasTag(t)
         return tags[t] ~= nil
+    end
+
+    ---tte added:
+    ---Gets the waypointref for Point[ix]
+    ---@param ix integer
+    ---@return string|nil
+    function s.GetWaypointRef(ix)
+        if ix == nil or ix < 1 or ix > #points then
+            return nil
+        end
+        return points[ix].WaypointRef()
     end
 
     return setmetatable(s, Route)

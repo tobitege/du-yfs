@@ -220,8 +220,9 @@ function FlightFSM.New(settings, routeController, geo)
                 startDist = 20
                 stopDist = 0.3
             else
-                startDist = 0.5
-                stopDist = 0
+                --startDist = 0.5
+                startDist = 0.1 --tte
+                stopDist = 0.0
             end
         else
             startDist = 20
@@ -230,9 +231,13 @@ function FlightFSM.New(settings, routeController, geo)
 
         if remainingDistance > startDist
             or remainingDistance <= stopDist then -- To not make it painfully slow in reaching the final position we let it go when it is this close from the target
+            --system.print("speed1: " .. currentTargetSpeed)
+            --system.print("remainingDistance: " .. remainingDistance)
             return currentTargetSpeed
         end
 
+        --system.print("speed2: " .. currentTargetSpeed)
+        --system.print("remainingDistance: " .. remainingDistance)
         return evaluateNewLimit(currentTargetSpeed, linearSpeed(remainingDistance), "Approaching")
     end
 
@@ -491,7 +496,7 @@ function FlightFSM.New(settings, routeController, geo)
 
         -- Make sure that engine tags only include the absolute minimum number of engines as it
         -- is the first command to the engine that takes effect, not the last one. For example,
-        -- lateral engines must be adressed with 'lateran AND analog' or a lateral rocket engine
+        -- lateral engines must be adressed with 'lateral AND analog' or a lateral rocket engine
         -- also gets the command.
 
         -- You can mix space (AND) and comma (OR), AND groups will be evaluated first so you can do
@@ -517,6 +522,16 @@ function FlightFSM.New(settings, routeController, geo)
             boosterStateChanged = false
             SetEngineThrust("rocket_engine", boosterActive and 1 or 0)
         end
+    end
+
+    --tte
+    ---@return number
+    local function altitude()
+        local curr = Current()
+        if curr == nil then return 0 end
+        local body = universe.ClosestBody(curr)
+        if body == nil then return 0 end
+        return (curr - body.Geography.Center):Len() - body.Geography.Radius
     end
 
     ---@param deltaTime number The time since last Flush
@@ -557,6 +572,7 @@ function FlightFSM.New(settings, routeController, geo)
         end
 
         flightData.controlAcc = acceleration:Len()
+        flightData.altitude = altitude() --tte
         return acceleration, speedLimit
     end
 
@@ -581,9 +597,9 @@ function FlightFSM.New(settings, routeController, geo)
             local acceleration, speedLimit = move(deltaTime, next, previous)
             local adjustmentAcc = adjustForDeviation(pos, next, previous)
 
-            -- Feed the break the acceleration vector only, not including the adjustments - we might not be accelerating at all but still adjusting for gravity pull.
+            -- Feed the brakes the acceleration vector only, not including the adjustments - we might not be accelerating at all but still adjusting for gravity pull.
             brakes.Feed(next.DirectionTo(), acceleration:Normalize(), speedLimit)
-
+            --system.print(acceleration:Len())
             applyAcceleration(acceleration, adjustmentAcc)
         end
     end

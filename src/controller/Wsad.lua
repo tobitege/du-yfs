@@ -9,6 +9,7 @@ local NF                               = function() return not IsFrozen() end
 local Clamp                            = calc.Clamp
 
 local defaultMargin                    = constants.flight.defaultMargin
+local sp                               = system.print --TTE
 
 ---@class Wsad
 ---@field New fun(flightcore:FlightCore):Wsad
@@ -45,7 +46,6 @@ function Wsad.New(fsm, flightCore, settings, access)
     local function getForwardToggle()
         return forwardToggle and allowForwardToggle
     end
-
 
     input.SetThrottle(1) -- Start at max speed
     local throttleStep = settings.Get("throttleStep", constants.flight.throttleStep) / 100
@@ -97,6 +97,7 @@ function Wsad.New(fsm, flightCore, settings, access)
 
     local function monitorHeight()
         desiredAltitude = altitude()
+        --sp("monitorHeight: " .. desiredAltitude) --TTE
         stopVerticalMovement = true
     end
 
@@ -116,14 +117,15 @@ function Wsad.New(fsm, flightCore, settings, access)
             -- As we meassure only periodically, we can't make the threshold too small. 0.2m/s was too small, we can miss that when moving fast.
             if stopVerticalMovement and Velocity():ProjectOn(-VerticalReferenceVector()):Len() < 0.5 then
                 desiredAltitude = altitude()
+                --sp("B " .. desiredAltitude) --TTE
                 stopVerticalMovement = false
             end
-
 
             -- Find the direction from body center to forward point and calculate a new point with same
             -- height as the movement started at so that we move along the curvature of the body.
             local pointInDir = curr + dir * dist
             local center = body.Geography.Center
+            --sp("C " .. desiredAltitude) --TTE
             return center + (pointInDir - center):NormalizeInPlace() * desiredAltitude
         end
 
@@ -219,9 +221,10 @@ function Wsad.New(fsm, flightCore, settings, access)
         local prev = value
         value = Clamp(value + delta, -1, 1)
 
-        if value == 0 then
-            monitorHeight()
-        end
+        --tte commented out
+        --if value == 0 then
+        monitorHeight()
+        --end
 
         newMovement = value ~= prev
         gateControl.Enable(false)

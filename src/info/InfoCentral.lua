@@ -250,9 +250,9 @@ function InfoCentral.Instance()
     end)
 
     pub.RegisterTable("WaypointData",
-        ---@param topic string
+        ---@param _ string
         ---@param waypoint Waypoint
-        function(topic, waypoint)
+        function(_, waypoint)
             if not waypointInfo.panel and waypointInfo.visible then
                 local p = sharedPanel.Get("Waypoint")
                 waypointInfo.panel = p

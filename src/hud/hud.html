@@ -25,6 +25,21 @@
             text-shadow: 2px 2px black;
         }
 
+        .infoColor {
+            color: white;
+        }
+
+        .info {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+        }
+
+        .info>p {
+            font: 26px Montserrat;
+            text-shadow: 2px 2px black;
+        }
+
         .progress-container {
             width: 335px;
             text-align: center;
@@ -101,6 +116,16 @@
         end
         end %}
     </div>
+    {% if info or routeName then %}
+    <div class="info infoColor">
+        {% if routeName and routeName:len() > 0 then %}
+        <p>{{routeName}} : {{pointIx}}
+            {% if pointRef then %} - {{pointRef}}{% end %}
+        </p>
+        {% end %}
+        {% if info then %}<p>{{info}}</p>{% end %}
+    </div>
+    {% end %}
 </body>
 
 </html>

@@ -3,7 +3,7 @@ local s = require("Singletons")
 
 local pub, input, commandLine, log, radar, floorDetector = s.pub, s.input, s.commandLine, s.log, s.radar,
     s.floorDetector
-local ControlCommands, RouteController, BufferedDB, Fuel, FlightFSM, FlightCore, ScreenController, Communcation, Settings, Hud, InfoCentral, Wsad, Access, GeoFence =
+local ControlCommands, RouteController, BufferedDB, Fuel, FlightFSM, FlightCore, ScreenController, Communication, Settings, Hud, InfoCentral, Wsad, Access, GeoFence =
     require("controller/ControlCommands"),
     require("flight/route/RouteController"), require("storage/BufferedDB"), require("info/Fuel"),
     require("flight/FlightFSM"), require("flight/FlightCore"), require("controller/ScreenController"),
@@ -111,17 +111,14 @@ local function Start(isECU)
             radar.Show(settings.Boolean("showRadarOnStart"))
             radar.Sort(settings.Number("defaultRadarMode"))
 
-            settings.Callback("defaultRadarMode", function(value)
-                radar.Sort(value)
-            end)
+            settings.Callback("defaultRadarMode", function(value) radar.Sort(value) end)
         end
-
         pub.Publish("ShowInfoWidgets", settings.Boolean("showWidgetsOnStart", false))
-
         local channel = settings.String("commChannel")
         local comm
         if not isECU and channel ~= "" then
-            comm = Communcation.New(channel)
+            system.print("[I] Channel name: " .. (channel or type(channel))) --tte
+            comm = Communication.New(channel)
         end
     end).Catch(function(t)
         log.Error(t.Name(), t.Error())

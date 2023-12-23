@@ -249,9 +249,10 @@ function FlightCore.New(routeController, flightFSM)
 
                 if currentWaypoint ~= nil then
                     pub.Publish("WaypointData", currentWaypoint)
-
+                    local tmpPos = universe.CreatePos(currentWaypoint.Destination()).AsPosString() --tte
+                    --system.print("x " .. tmpPos) --tte
                     if settings.Boolean("setWaypointAlongRoute", false) then
-                        system.setWaypoint(universe.CreatePos(currentWaypoint.Destination()).AsPosString(), false)
+                        system.setWaypoint(tmpPos, false)
                     end
                 end
             end,
@@ -259,7 +260,7 @@ function FlightCore.New(routeController, flightFSM)
         )
 
         if not status then
-            system.print(err)
+            system.print("fcUpdate: " .. err)
             unit.exit()
         end
     end
@@ -321,7 +322,7 @@ function FlightCore.New(routeController, flightFSM)
         )
 
         if not status then
-            system.print(err)
+            system.print("fcFlush: " .. err)
             unit.exit()
         end
     end

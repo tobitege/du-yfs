@@ -1,8 +1,7 @@
 require("abstraction/Vehicle")
 require("GlobalTypes")
-local s                                                                                         = require("Singletons")
-local log, pub, su, commandLine, calc                                                           = s.log, s.pub, s
-    .strUtil, s.commandLine, s.calc
+local si = require("Singletons")
+local log, pub, su, commandLine, calc = si.log, si.pub, si.strUtil, si.commandLine, si.calc
 
 local ValueTree, layout, Stream, ScreenDevice, pagination, distanceFormat, massFormat, max, min =
     require("util/ValueTree"), require("screen/layout_out"), require("Stream"), require("device/ScreenDevice"),
@@ -11,8 +10,8 @@ local ValueTree, layout, Stream, ScreenDevice, pagination, distanceFormat, massF
 ---@class ScreenController
 ---@field ActivateFloorMode fun(string):boolean
 
-local ScreenController                                                                          = {}
-ScreenController.__index                                                                        = ScreenController
+local ScreenController = {}
+ScreenController.__index = ScreenController
 
 ---@param flightCore FlightCore
 ---@param settings Settings
