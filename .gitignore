@@ -1,7 +1,7 @@
 libs/
 temp/
-out/
 /luacov-html/
 src/version_out.lua
 *.pdf
 src/screen/layout_out.lua
+util/Codex.lua
