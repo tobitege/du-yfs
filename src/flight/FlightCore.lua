@@ -1,12 +1,12 @@
 require("abstraction/Vehicle")
 require("GlobalTypes")
-local s                                                               = require("Singletons")
-local log, gateControl, pub, universe, calc, constants, brakes, floor = s.log, s.gateCtrl, s.pub, s.universe, s.calc,
-    s.constants, s.brakes, s.floorDetector
-local VertRef                                                         = s.universe.VerticalReferenceVector
+local si                                    = require("Singletons")
+local log, gateControl, pub, universe, calc = si.log, si.gateCtrl, si.pub, si.universe, si.calc
+local constants, brakes, floor              = si.constants, si.brakes, si.floorDetector
+local VertRef                               = si.universe.VerticalReferenceVector
 
-local AxisManager, Ternary, plane, abs, delta                         = require("flight/AxisManager"), calc.Ternary,
-    Plane.NewByVertialReference(), math.abs, Stopwatch.New()
+local AxisManager, Ternary                  = require("flight/AxisManager"), calc.Ternary
+local plane, abs, delta                     = Plane.NewByVertialReference(), math.abs, Stopwatch.New()
 
 require("flight/state/Require")
 
@@ -50,7 +50,7 @@ function FlightCore.CreateWPFromPoint(point, lastInRoute, pathAlignmentDistanceL
     end
     local maxSpeed = opt.Get(PointOptions.MAX_SPEED, 0) -- 0 = ignored/max speed.
 
-    local coordinate = universe.ParsePosition(point.Pos()).Coordinates()
+    local coordinate = point.ParsedPos().Coordinates()  --tte
 
     local wp = Waypoint.New(coordinate, finalSpeed, maxSpeed, margin, pathAlignmentDistanceLimitFromSurface)
     wp.SetLastInRoute(lastInRoute)
@@ -97,14 +97,10 @@ function FlightCore.New(routeController, flightFSM)
 
     ---Selects the next waypoint
     function s.NextWP()
-        if route == nil then
-            return
-        end
+        if not route then return end
 
         local nextPoint = route.Next()
-        if nextPoint == nil then
-            return
-        end
+        if not nextPoint then return end
 
         previousWaypoint = currentWaypoint
         currentWaypoint = FlightCore.CreateWPFromPoint(nextPoint, route.LastPointReached(),
@@ -250,7 +246,6 @@ function FlightCore.New(routeController, flightFSM)
                 if currentWaypoint ~= nil then
                     pub.Publish("WaypointData", currentWaypoint)
                     local tmpPos = universe.CreatePos(currentWaypoint.Destination()).AsPosString() --tte
-                    --system.print("x " .. tmpPos) --tte
                     if settings.Boolean("setWaypointAlongRoute", false) then
                         system.setWaypoint(tmpPos, false)
                     end
@@ -260,7 +255,6 @@ function FlightCore.New(routeController, flightFSM)
         )
 
         if not status then
-            system.print("fcUpdate: " .. err)
             unit.exit()
         end
     end
@@ -322,7 +316,6 @@ function FlightCore.New(routeController, flightFSM)
         )
 
         if not status then
-            system.print("fcFlush: " .. err)
             unit.exit()
         end
     end

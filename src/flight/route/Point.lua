@@ -1,5 +1,8 @@
 local PointOptions = require("flight/route/PointOptions")
 
+local si           = require("Singletons")
+local universe     = si.universe
+
 -- This class represents a position and behavior in a route.
 -- Keep data as small as possible.
 
@@ -8,6 +11,7 @@ local PointOptions = require("flight/route/PointOptions")
 ---@class Point Represents a point/waypoint in a route
 ---@field New fun(pos:string, waypointRef?:string, options?:PointOptions):Point
 ---@field Pos fun():string
+---@field ParsedPos fun():Position|nil
 ---@field HasWaypointRef fun():boolean
 ---@field WaypointRef fun():string|nil
 ---@field SetWaypointRef fun(ref:string)
@@ -15,8 +19,8 @@ local PointOptions = require("flight/route/PointOptions")
 ---@field Options fun():PointOptions
 ---@field SetOptions fun(newOptions:PointOptions)
 ---@field LoadFromPOD fun(source:PointPOD):Point
-local Point = {}
-Point.__index = Point
+local Point        = {}
+Point.__index      = Point
 
 ---Creates a new Point
 ---@param pos string A ::pos{} string
@@ -29,6 +33,22 @@ function Point.New(pos, waypointRef, options)
     local position = pos -- ::pos{} string
     local wpRef = waypointRef
     local opt = options or PointOptions.New()
+
+    --tte added: parsedPos to reduce repeated string parsing on fixed text
+    local parsedPos = nil
+    if type(pos) == "string" then
+        parsedPos = universe.ParsePosition(pos) ---@type Position|nil
+    end
+
+    --tte added:
+    ---Returns the parsed Position type of the original ::pos{} string.
+    ---@return Position|nil
+    function s.ParsedPos()
+        if not parsedPos or parsedPos == "" then
+            parsedPos = universe.ParsePosition(pos) ---@type Position|nil
+        end
+        return parsedPos
+    end
 
     ---Returns the ::pos{} string. When retrieved from a loaded route, this is guaranteed to be populated.
     ---@return string

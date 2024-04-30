@@ -2,9 +2,8 @@
 ---@module "element/Telemeter"
 
 require("abstraction/Vehicle")
-local s                            = require("Singletons")
-local log, pub, gateControl, timer = s.log, s.pub, s.gateCtrl, s.timer
-
+local si = require("Singletons")
+local log, pub, gateControl, timer = si.log, si.pub, si.gateCtrl, si.timer
 
 ---@class Hold
 ---@field New fun(fsm:FlightFSM):FlightState

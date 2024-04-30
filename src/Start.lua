@@ -117,7 +117,6 @@ local function Start(isECU)
         local channel = settings.String("commChannel")
         local comm
         if not isECU and channel ~= "" then
-            system.print("[I] Channel name: " .. (channel or type(channel))) --tte
             comm = Communication.New(channel)
         end
     end).Catch(function(t)

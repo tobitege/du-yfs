@@ -46,6 +46,7 @@ function Brake.Instance()
     local autoBrakeAngle = 45
     local autoBrakeDelay = 1
     local _1kmph = calc.Kph2Mps(1)
+    local _3kmph = calc.Kph2Mps(3)
 
     local s = {
         engaged = false,
@@ -191,7 +192,7 @@ function Brake.Instance()
 
         local availableBrakeDeceleration = -s.GravityInfluencedAvailableDeceleration() * brakeEfficiency
 
-        if inAtmo and currentSpeed < calc.Kph2Mps(3) then
+        if inAtmo and currentSpeed < _3kmph then
             -- When standing (nearly) still in atmo, assume brakes gives current g of brake acceleration (brake API gives a 0 as response in this case)
             local maxSeen = s.MaxSeenGravityInfluencedAvailableAtmoDeceleration()
             availableBrakeDeceleration = -max(maxSeen, G())
@@ -228,7 +229,7 @@ function Brake.Instance()
         autoBrakeAngle = angle
     end
 
-    ---Sets the auto brake angle
+    ---Sets the auto brake delay
     ---@param delay number
     function s.SetAutoBrakeDelay(delay)
         autoBrakeDelay = delay

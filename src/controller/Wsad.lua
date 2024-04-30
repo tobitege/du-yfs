@@ -1,21 +1,20 @@
 require("GlobalTypes")
-local s                                = require("Singletons")
-local log, universe, input, pub, gateControl,
-constants, calc, keys, floor, gateCtrl =
-    s.log, s.universe, s.input, s.pub, s.gateCtrl, s.constants, s.calc, s.keys, s.floorDetector, s.gateCtrl
-local VerticalReferenceVector          = universe.VerticalReferenceVector
-local Sign                             = calc.Sign
-local NF                               = function() return not IsFrozen() end
-local Clamp                            = calc.Clamp
+local si                                     = require("Singletons")
+local log, universe, input, pub, gateControl = si.log, si.universe, si.input, si.pub, si.gateCtrl
+local constants, calc, keys                  = si.constants, si.calc, si.keys
+local VerticalReferenceVector                = universe.VerticalReferenceVector
+local Clamp                                  = calc.Clamp
+local Sign                                   = calc.Sign
+local NF                                     = function() return not IsFrozen() end
 
-local defaultMargin                    = constants.flight.defaultMargin
-local sp                               = system.print --TTE
+local defaultMargin                          = constants.flight.defaultMargin
+local sp                                     = system.print --TTE
 
 ---@class Wsad
 ---@field New fun(flightcore:FlightCore):Wsad
 
-local Wsad                             = {}
-Wsad.__index                           = Wsad
+local Wsad                                   = {}
+Wsad.__index                                 = Wsad
 
 ---@param fsm FlightFSM
 ---@param flightCore FlightCore
@@ -97,7 +96,6 @@ function Wsad.New(fsm, flightCore, settings, access)
 
     local function monitorHeight()
         desiredAltitude = altitude()
-        --sp("monitorHeight: " .. desiredAltitude) --TTE
         stopVerticalMovement = true
     end
 
@@ -113,11 +111,10 @@ function Wsad.New(fsm, flightCore, settings, access)
                 + plane.Up() * vertical)
             :Normalize()
 
-        if body:IsInAtmo(curr) and vertical == 0 then
+        if body:IsInAtmo(curr) and (stopVerticalMovement or (vertical == 0)) then
             -- As we meassure only periodically, we can't make the threshold too small. 0.2m/s was too small, we can miss that when moving fast.
-            if stopVerticalMovement and Velocity():ProjectOn(-VerticalReferenceVector()):Len() < 0.5 then
+            if stopVerticalMovement and Velocity():ProjectOn(-VerticalReferenceVector()):Len() < 0.4 then
                 desiredAltitude = altitude()
-                --sp("B " .. desiredAltitude) --TTE
                 stopVerticalMovement = false
             end
 
@@ -125,15 +122,13 @@ function Wsad.New(fsm, flightCore, settings, access)
             -- height as the movement started at so that we move along the curvature of the body.
             local pointInDir = curr + dir * dist
             local center = body.Geography.Center
-            --sp("C " .. desiredAltitude) --TTE
             return center + (pointInDir - center):NormalizeInPlace() * desiredAltitude
         end
-
         return Current() + dir * dist
     end
 
     Task.New("WASD", function()
-        local t = 0.1
+        local t = 0.02
         local sw = Stopwatch.New()
         sw.Start()
         local wantsToMove = false
@@ -168,16 +163,15 @@ function Wsad.New(fsm, flightCore, settings, access)
 
         while true do
             local curr = Current()
-            local body = universe.ClosestBody(curr)
-
             local hadNewMovement = newMovement
 
             wantsToMove = getForwardToggle() or longitudal ~= 0 or vertical ~= 0 or lateral ~= 0
             if not wantsToMove and newMovement then
-                stopPos = Current()
+                stopPos = curr
             end
 
             if IsFrozen() then
+                local holdMargin = defaultMargin * 0.5
                 if wantsToMove then
                     gateControl.Enable(false)
                     if pointDir:IsZero() then
@@ -189,15 +183,14 @@ function Wsad.New(fsm, flightCore, settings, access)
                         sw.Restart()
 
                         local throttleSpeed = getThrottleSpeed()
-                        local target = movement(body)
-                        flightCore.GotoTarget(target, pointDir, defaultMargin, throttleSpeed, throttleSpeed, true, true)
+                        local target = movement(universe.ClosestBody(curr))
+                        flightCore.GotoTarget(target, pointDir, holdMargin, throttleSpeed, throttleSpeed, true, true)
                     end
                 else
                     if newMovement then
-                        flightCore.GotoTarget(stopPos, pointDir, defaultMargin, 0, construct.getMaxSpeed(), true, true)
+                        flightCore.GotoTarget(stopPos, pointDir, holdMargin, 0, construct.getMaxSpeed(), true, true)
                     elseif not stopPos:IsZero() and Velocity():Normalize():Dot(stopPos - curr) >= 0 then
-                        local holdMargin = defaultMargin
-                        flightCore.GotoTarget(Current(), pointDir, holdMargin, calc.Kph2Mps(2), 0, false, true)
+                        flightCore.GotoTarget(curr, pointDir, holdMargin, calc.Kph2Mps(2), 0, false, true)
                         stopPos = Vec3.zero
                     end
                 end
@@ -221,12 +214,12 @@ function Wsad.New(fsm, flightCore, settings, access)
         local prev = value
         value = Clamp(value + delta, -1, 1)
 
-        --tte commented out
-        --if value == 0 then
-        monitorHeight()
-        --end
-
         newMovement = value ~= prev
+
+        if (value == 0) or newMovement then
+            monitorHeight()
+        end
+
         gateControl.Enable(false)
 
         return value

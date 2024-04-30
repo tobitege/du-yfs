@@ -1,16 +1,20 @@
 {
-  "source": [
-    {
-      "dir": "./src",
-      "exclude": []
-    },
-    {
-      "dir": "./e",
-      "exclude": []
-    },
-    {
-      "dir": "./util",
-      "exclude": []
-    }
-  ]
+	"source": [
+		{
+			"dir": "./src",
+			"exclude": []
+		},
+		{
+			"dir": "./e",
+			"exclude": []
+		},
+		{
+			"dir": "./libs",
+			"exclude": []
+		},
+		{
+			"dir": "./util",
+			"exclude": []
+		}
+	]
 }

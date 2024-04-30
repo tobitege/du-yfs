@@ -1,5 +1,5 @@
-local s        = require("Singletons")
-local log, pub = s.log, s.pub
+local sn       = require("Singletons")
+local log, pub = sn.log, sn.pub
 
 ---@class Idle
 ---@field New fun(fsm:FlightFSM):FlightState

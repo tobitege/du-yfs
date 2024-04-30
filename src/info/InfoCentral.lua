@@ -1,5 +1,5 @@
-local s                              = require("Singletons")
-local pub, calc, sharedPanel, format = s.pub, s.calc, require("panel/SharedPanel").Instance(), string.format
+local si                             = require("Singletons")
+local pub, calc, sharedPanel, format = si.pub, si.calc, require("panel/SharedPanel").Instance(), string.format
 
 ---@class InfoCentral
 ---@field Instance fun():InfoCentral

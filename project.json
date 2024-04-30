@@ -47,7 +47,8 @@
     "release": {
       "name": "release",
       "minify": true,
-      "compress": true
+      "compress": true,
+      "stripComments": true
     }
   },
   "internalPaths": [

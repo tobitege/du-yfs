@@ -32,7 +32,7 @@ function FloorDetector.Instance()
             tele = nil
         end
     else
-        log.Error("No telementer by name '", floorDetectorName, "' found")
+        log.Error("No telemeter by name '", floorDetectorName, "' found")
     end
 
     function inst.Present()

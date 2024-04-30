@@ -55,7 +55,7 @@ local layout = {
                     layer = 2,
                     pos1 = "(640,180)",
                     dimensions = "(180,180)",
-                    url = "assets.prod.novaquark.com/70604/92eeafe5-527f-49f5-af7a-cb0c4a771f5b.png",
+                    url = "assets.prod.novaquark.com/58940/70d2b8fb-b570-446b-8da6-989e3f41ea5e.png",
                     style = "bkgDark"
                 },
                 {

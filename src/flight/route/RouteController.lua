@@ -634,10 +634,10 @@ function RouteController.Instance(bufferedDB)
         local d = {}
 
         if #points > 0 then
-            local prev = universe.ParsePosition(points[1].Pos()):Coordinates()
+            local prev = points[1].ParsedPos():Coordinates()
             d[#d + 1] = 0
             for i = 2, #points do
-                local curr = universe.ParsePosition(points[i].Pos()):Coordinates()
+                local curr = points[i].ParsedPos():Coordinates()
                 local diff = (curr - prev):Len()
                 d[#d + 1] = d[#d] + diff
                 prev = curr

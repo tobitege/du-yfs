@@ -216,12 +216,14 @@ function FlightFSM.New(settings, routeController, geo)
         local stopDist
 
         if IsInAtmo() then
-            if lastReadMass > LightConstructMassThreshold then
+            if lastReadMass > 500000 then
                 startDist = 20
                 stopDist = 0.3
+            elseif lastReadMass > 2 * LightConstructMassThreshold then
+                startDist = 1
+                stopDist = 0.3
             else
-                --startDist = 0.5
-                startDist = 0.1 --tte
+                startDist = 0.5
                 stopDist = 0.0
             end
         else
@@ -231,13 +233,9 @@ function FlightFSM.New(settings, routeController, geo)
 
         if remainingDistance > startDist
             or remainingDistance <= stopDist then -- To not make it painfully slow in reaching the final position we let it go when it is this close from the target
-            --system.print("speed1: " .. currentTargetSpeed)
-            --system.print("remainingDistance: " .. remainingDistance)
             return currentTargetSpeed
         end
 
-        --system.print("speed2: " .. currentTargetSpeed)
-        --system.print("remainingDistance: " .. remainingDistance)
         return evaluateNewLimit(currentTargetSpeed, linearSpeed(remainingDistance), "Approaching")
     end
 
@@ -343,7 +341,9 @@ function FlightFSM.New(settings, routeController, geo)
             end
         end
 
-        if inAtmo and abs(brakes.EffectiveBrakeDeceleration()) <= G() then
+        local brakesDecel = brakes.EffectiveBrakeDeceleration()
+        if inAtmo and abs(brakesDecel) <= calc.Mps2Kph(G()) then
+            --system.print(brakesDecel)
             -- Brakes have become so inefficient at the current altitude or speed they are useless, use linear speed
             -- This state can be seen when entering atmo for example.
             targetSpeed = evaluateNewLimit(targetSpeed, linearSpeed(remainingDistance), "Brake/ineff")

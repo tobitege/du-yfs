@@ -1,6 +1,6 @@
 require("abstraction/Vehicle")
-local s        = require("Singletons")
-local floor    = s.floorDetector
+local si       = require("Singletons")
+local floor    = si.floorDetector
 
 ---@class Travel
 ---@field New fun(fsm:FlightFSM):FlightState

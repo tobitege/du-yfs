@@ -5,3 +5,4 @@ temp/
 src/screen/layout_out.lua
 src/version_out.lua
 util/Codex.lua
+.history/

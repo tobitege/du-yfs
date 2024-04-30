@@ -22,9 +22,7 @@ Settings.__index          = Settings
 ---@param db BufferedDB
 ---@return Settings
 function Settings.Create(db)
-    if singleton then
-        return singleton
-    end
+    if singleton then return singleton end
 
     local s = {}
 
@@ -236,6 +234,10 @@ function Settings.Create(db)
     ---@param default? boolean
     ---@return boolean
     function s.Boolean(key, default)
+        if type(key) == "nil" then
+            log.Error("Settings.Boolean: key is nil")
+            return false
+        end
         local v = s.Get(key, default)
         ---@cast v boolean
         return v
@@ -245,6 +247,10 @@ function Settings.Create(db)
     ---@param default? number
     ---@return number
     function s.Number(key, default)
+        if not key then
+            log.Error("Settings.Number: key is nil")
+            return 0
+        end
         local v = s.Get(key, default)
         ---@cast v number
         return v
@@ -254,6 +260,10 @@ function Settings.Create(db)
     ---@param default? string
     ---@return string
     function s.String(key, default)
+        if not key then
+            log.Error("Settings.String: key is nil")
+            return ""
+        end
         local v = s.Get(key, default)
         ---@cast v string
         return v

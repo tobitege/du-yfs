@@ -55,9 +55,11 @@ function Route.New()
     local tags = {} ---@type table<string, boolean>
 
     ---@param ix number
-    ---@return Vec3
+    ---@return Vec3|nil
     local function coordsFromPoint(ix)
-        return universe.ParsePosition(points[ix]:Pos()):Coordinates()
+        local tmp = points[ix]:ParsedPos()
+        if not tmp then return nil end
+        return points[ix]:ParsedPos():Coordinates()
     end
 
     ---Returns true if the index is within bounds
@@ -80,7 +82,7 @@ function Route.New()
         local pos = universe.ParsePosition(positionString)
 
         if pos == nil then
-            log.Error("Could not add position to route")
+            log.Error("Could not add invalid position to route")
             return nil
         end
 
@@ -158,7 +160,7 @@ function Route.New()
     ---@return Point|nil
     function s.Next()
         if s.LastPointReached() then
-            pub.Publish("RouteInfo", {})  --tte
+            pub.Publish("RouteInfo", {}) --tte
             return nil
         end
 
@@ -198,11 +200,10 @@ function Route.New()
 
         for i, p in ipairs(points) do
             local coords = coordsFromPoint(i)
-            if probeCoord:Dist(coords) <= margin then
+            if coords and probeCoord:Dist(coords) <= margin then
                 found[#found + 1] = p
             end
         end
-
         return found
     end
 
@@ -262,7 +263,7 @@ function Route.New()
         points = toKeep
     end
 
-    ---Replaces a point in the route, keping options from original point
+    ---Replaces a point in the route, keeping options from original point
     ---@param currentPos Vec3 Current position
     ---@param gateControlDistance number
     local function replaceStartPoint(currentPos, gateControlDistance)
@@ -332,7 +333,7 @@ function Route.New()
         local prev
 
         for i = nextPointIx, #points, 1 do
-            local pos = universe.ParsePosition(points[i].Pos())
+            local pos = points[i].ParsedPos()
             if pos then
                 if prev then
                     total = total + (prev - pos.Coordinates()):Len()

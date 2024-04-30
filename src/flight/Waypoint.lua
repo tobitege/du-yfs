@@ -232,11 +232,11 @@ function Waypoint.New(destination, finalSpeed, maxSpeed, margin, pathAlignmentDi
             local moveDir, forward = Velocity():Normalize(), upPlane.Forward()
 
             if s.DistanceTo() > 10 and Velocity():Len() > calc.Kph2Mps(50)
-                and BetweenOrEqual(moveDir:AngleToDeg(gravPlane.Up()), 40, 140) -- Prevent flipping backwards
+                and BetweenOrEqual(moveDir:AngleToDeg(gravPlane.Up()), 40, 180 - 40) -- Prevent flipping backwards
                 -- Not going vertically
                 and BetweenOrEqual(gravPlane.Up():AngleToDeg(s.DirectionTo()), 15, 180 - 15)
                 -- Not reversing or strafing
-                and BetweenOrEqual(forward:AngleToDeg(s.DirectionTo()), 0, 75)
+                and BetweenOrEqual(forward:AngleToDeg(s.DirectionTo()), 0, 60) --tte old: 75
             then
                 return Current() + moveDir * directionMargin
             end
